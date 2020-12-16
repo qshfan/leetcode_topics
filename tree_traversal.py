@@ -197,12 +197,39 @@ def inorderTraversal_2(root):
 # LC. 103 Binary Tree Zigzag Level Order Traversal
 # append node.val, not append node..
 def zigzagLevelOrder(root):
+    # Note: parents is a queue, not a stack
     parents, res = [root], []
-    while parents:
+    direction = 1
+    while root and parents:
         child = []
-        res.append([parents])
+        if direction:
+            res.append([parent.val for parent in parents])
+        else:
+            res.append([parent.val for parent in reversed(parents)])
+        direction ^= 1
         for parent in parents:
-            if parent:
-                child.append(parent.left, parent.right)
+            if parent.left:
+                child.append(parent.left)
+            if parent.right:
+                child.append(parent.right)
         parents = child
+    return res
+
+
+# another way of using direction (avoiding code repeating):
+def zigzagLevelOrder_1(root):
+    if not root:
+        return None
+    queue = [root]
+    flag = 1
+    res = []
+    while queue:
+        res.append([node.val for node in queue[::flag]])
+        for i in range(len(queue)):
+            node = queue.pop(0)
+            if node.left:
+                queue.append(node.left)
+            if node.right:
+                queue.append(node.right)
+        flag *= -1
     return res
