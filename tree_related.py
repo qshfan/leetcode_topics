@@ -16,6 +16,21 @@
 #   - trim tree
 #   - split tree
 
+
+# Problem list:
+
+# Tree Traversal (easier using recursive)
+# LC. 144 Binary tree preorder traversal
+# LC. 145 Binary Tree Postorder Traversal
+# LC. 94 Binary Tree Inorder Traversal
+# LC. 103 Binary Tree Zigzag Level Order Traversal
+# LC. 105 Construct Binary Tree from Preorder and Inorder Traversal
+# LC. 429 N-ary Tree Level Order Traversal
+# LC. 590 N-ary Tree Postorder Traversal
+
+# Tree Property
+
+
 # Get to know tree - Implementation
 class TreeNode:
     def __init__(self, data):
@@ -225,7 +240,7 @@ def zigzagLevelOrder_1(root):
     res = []
     while queue:
         res.append([node.val for node in queue[::flag]])
-        for i in range(len(queue)):
+        for _ in range(len(queue)):
             node = queue.pop(0)
             if node.left:
                 queue.append(node.left)
@@ -233,3 +248,181 @@ def zigzagLevelOrder_1(root):
                 queue.append(node.right)
         flag *= -1
     return res
+
+
+# LC. 105 Construct Binary Tree from Preorder and Inorder Traversal
+# did end up solving it
+# def buildTree(preorder, inorder):
+#     lut = {}
+#     for index, elem in enumerate(inorder):
+#         lut[elem] = index
+#     pt, stack = 0, []
+
+#     while pt < len(preorder) - 1:
+#         node = TreeNode(preorder[pt])
+#         stack += [node]
+#         if (
+#             lut[preorder[pt + 1]] < lut[preorder[pt]]
+#         ):  # next node at left side (direct child)
+#             node.left = TreeNode(preorder[pt + 1])
+#         else:  # next node at right side, not necessary direct child
+#             # moving right, probably hit a leaf. -- pop it out from stack
+#             left_leaf = stack.pop()
+#         pt += 1
+
+
+def buildTree(preorder, inorder):
+    if inorder:
+        ind = inorder.index(preorder.pop(0))
+        root = TreeNode(inorder[ind])
+        root.left = buildTree(preorder, inorder[0:ind])
+        root.right = buildTree(preorder, inorder[ind + 1 :])
+        return root
+
+
+# optimized with map
+def buildTree_2(preorder, inorder):
+    inor_dict = {}
+    for i, num in enumerate(inorder):
+        inor_dict[num] = i
+    pre_iter = iter(preorder)
+
+    def helper(start, end):
+        if start > end:
+            return None
+        root_val = next(pre_iter)
+        root = TreeNode(root_val)
+        idx = inor_dict[root_val]
+        root.left = helper(start, idx - 1)
+        root.right = helper(idx + 1, end)
+        return root
+
+    return helper(0, len(inorder) - 1)
+
+
+# Iterative solution
+# https://leetcode.wang/leetcode-105-Construct-Binary-Tree-from-Preorder-and-Inorder-Traversal.html#解法二-迭代-栈
+def buildTree_3(preorder, inorder):
+    if not preorder:
+        return None
+    root = TreeNode(preorder[0])
+    stack = []
+    stack.append(root)
+
+    pre = 1
+    ino = 0
+    while pre < len(preorder):
+        curr = TreeNode(preorder[pre])
+        pre += 1
+        prev = None
+
+        # come from root, go through list preorder
+        # do two things: append current node to left or to right
+        # use stack to manipulate location where you want tree to keep growing.
+        # make the whole tree concatenate.
+
+        while stack and stack[-1].val == inorder[ino]:
+            prev = stack.pop()
+            ino += 1
+        if prev:
+            prev.right = curr
+        else:
+            stack[-1].left = curr
+
+        stack.append(curr)
+    return root
+
+
+# LC. 429 N-ary Tree Level Order Traversal
+def levelOrder(root):
+    queue = [root]
+    res = []
+    while queue and root:
+        tmp, children = [], []
+        for e in queue:
+            if e:
+                tmp += e.children
+                children.append(e.val)
+        res.append(children)
+        queue = tmp
+
+    return res
+
+
+# solution with deque -- slower and dont need deque....
+import collections
+
+
+def levelOrder_2(root):
+    if not root:
+        return []
+
+    traversal = []
+    queue = collections.deque()
+    queue.append((root, 0))
+
+    while queue:
+        node, level = queue.popleft()
+
+        if node:
+            traversal_depth = len(traversal) - 1
+            if traversal_depth < level:
+                traversal.append([])
+
+            traversal[level].append(node.val)
+
+            for child in node.children:
+                queue.append((child, level + 1))
+
+    return traversal
+
+
+# LC. 590 N-ary Tree Postorder Traversal
+# recursive
+def postorder(root):
+    res = []
+    dfs2(root, res)
+    return res
+
+
+def dfs2(root, res):
+    if root:
+        for c in root.children:
+            dfs2(c, res)
+        res.append(root.val)
+
+
+# recursive self
+def postorder_1(root):
+    if not root:
+        return []
+    if not res:
+        res = []
+    for i in root.children:
+        res += postorder_1(i)
+    return res + [root.val]
+
+
+# recursive using yield
+def postorder_3(root):
+    return list(traverse_in_postorder(root))
+
+
+def traverse_in_postorder(tree):
+    if tree:
+        for child in tree.children:
+            yield from traverse_in_postorder(child)
+        yield tree.val
+
+
+# iterative -- changed from preorder traversal
+def postorder_2(root):
+    res = []
+    if not root:
+        return None
+    stack = [root]
+    while stack:
+        curr = stack.pop()
+        res.append(curr.val)
+        stack.extend(curr.children)
+    return res[::-1]
