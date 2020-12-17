@@ -4,7 +4,7 @@
 # Tree problems categories:
 # - Binary Tree
 #   - tree traversal
-#   - tree property
+#   - tree property (Depth, height, diameter)
 #   - tree advanced property, LCA
 #   - tree path
 #   - Hoc
@@ -143,6 +143,26 @@ def postorderTraversal_2(root):
                 stack.append((node.left, False))
 
     return traversal
+
+
+# 2-2 th way: iterative  once in and out from stack, add checks of node.right
+def postorderTraversal_6(root):
+    stack, node, last = [], root, None
+    res = []
+    while stack or node:
+        if node:
+            stack.append(node)
+            node = node.left
+        else:
+            node = stack[-1]
+            if not node.right or last == node.right:
+                node = stack.pop()
+                res.append(node.val)
+                last = node
+                node = None
+            else:
+                node = node.right
+    return res
 
 
 # 3rd way: do preorder, then reverse the result -- also reverse the order to append to stack (first left then right)
@@ -426,3 +446,89 @@ def postorder_2(root):
         res.append(curr.val)
         stack.extend(curr.children)
     return res[::-1]
+
+
+#########################################################
+#      Tree Properties (Depth, Height, Diameter)        #
+#########################################################
+
+# LC. 111 Minimum Depth of Binary Tree
+def minDepth(root):
+    l, i = [root], 1
+    while l and root and all(n.left or n.right for n in l):
+        l, i = [kid for n in l for kid in [n.left, n.right] if kid], i + 1
+    return i if root else 0
+
+
+# LC. 110 Balanced Binary Tree
+# recursive
+def check(node):
+    if node == None:
+        return (0, True)
+    l_depth, l_balanced = check(node.left)
+    r_depth, r_balanced = check(node.right)
+    return (
+        max(l_depth, r_depth) + 1,
+        l_balanced and r_balanced and abs(l_depth - r_depth) <= 1,
+    )
+
+
+def isBalanced(root):
+    return check(root)[1]
+
+
+# iterative , based on postorder traversal
+def isBalanced_1(root):
+    stack, node, last, depths = [], root, None, {}
+    while stack or node:
+        if node:
+            stack.append(node)
+            node = node.left
+        else:
+            node = stack[-1]
+            if not node.right or last == node.right:
+                node = stack.pop()
+                left, right = depths.get(node.left, 0), depths.get(node.right, 0)
+                if abs(left - right) > 1:
+                    return False
+                depths[node] = 1 + max(left, right)
+                last = node
+                node = None
+            else:
+                node = node.right
+    return True
+
+
+# iterative  -- this is based on iterative solution from postorder.
+def isBalanced_2(root):
+    stack = [(root, False)]
+    depths = {}
+
+    while stack:
+        node, visited = stack.pop()
+        if node:
+            if visited:
+                depth_left, depth_right = 0, 0
+                if node.left:
+                    depth_left = depths[node.left]
+                if node.right:
+                    depth_right = depths[node.right]
+                if abs(depth_right - depth_left) > 1:
+                    return False
+                depths[node] = max(depth_right, depth_left) + 1
+            else:
+                stack.append((node, True))
+                stack.append((node.right, False))
+                stack.append((node.left, False))
+
+    return True
+
+
+# LC. 543
+# LC. 559
+# LC. 104
+#
+
+#########################################################
+#            Tree advanced property, LCA                #
+#########################################################
