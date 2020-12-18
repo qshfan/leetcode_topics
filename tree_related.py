@@ -524,10 +524,123 @@ def isBalanced_2(root):
     return True
 
 
-# LC. 543
-# LC. 559
-# LC. 104
-#
+# LC. 543 Diameter of Binary Tree
+# recursive
+def diameterOfBinaryTree(self, root: TreeNode) -> int:
+    dia = 0
+    return self.depth(root, dia)[1]
+
+
+def depth(self, node: TreeNode, dia: int) -> int:
+    if node:
+        left, dia_left = self.depth(node.left, dia)
+        right, dia_right = self.depth(node.right, dia)
+        dia = max(left + right, dia_left, dia_right)
+        depth = max(left, right) + 1
+        return depth, dia
+    else:
+        return 0, dia
+
+
+# improve: use attribute dia, doesnt need to pass it around between two function
+class Solution(object):
+    def diameterOfBinaryTree(self, root):
+        """
+        :type root: TreeNode
+        :rtype: int
+        """
+        self.ans = 0
+
+        def depth(p):
+            if not p:
+                return 0
+            left, right = depth(p.left), depth(p.right)
+            self.ans = max(self.ans, left + right)
+            return 1 + max(left, right)
+
+        depth(root)
+        return self.ans
+
+
+# iterative, based on postorder
+def diameterOfBinaryTree_2(self, root: TreeNode) -> int:
+    stack, postorder, children_max_height = [root], {}, 0
+    while stack and stack[-1]:
+        node = stack[-1]  # check if children processed already
+        if node.left and node.left not in postorder:
+            stack.append(node.left)
+        elif node.right and node.right not in postorder:
+            stack.append(node.right)
+        else:
+            node = stack.pop()  # children are processed or no children, pop the stack
+            left_height = postorder.get(node.left, 0)
+            right_height = postorder.get(node.right, 0)
+            postorder[node] = max(left_height, right_height) + 1  # 1 is node itself
+            children_max_height = max(left_height + right_height, children_max_height)
+    return children_max_height
+
+
+# LC. 559 Maximum Depth of N-ary Tree
+# recursive, DFS
+def maxDepth_nary(self, root: "Node") -> int:
+    # recursive
+    if root:
+        if root.children:
+            depth = max([self.maxDepth(e) for e in root.children])
+            # maybe better to use for generator?
+        else:
+            depth = 0
+        return 1 + depth
+    else:
+        return 0
+
+
+def maxDepth_nary_2(self, root: "Node") -> int:
+    if root == None:
+        return 0
+    depth = 0
+    for child in root.children:
+        depth = max(depth, self.maxDepth(child))  # saving the depth array
+    return depth + 1
+
+
+# iterative, BFS
+def maxDepth_nary_3(self, root):
+    q, level = root and [root], 0
+    while q:
+        q, level = [child for node in q for child in node.children if child], level + 1
+    return level
+
+
+# LC. 104 Maximum Depth of Binary Tree
+# recursive:
+def maxDepth(self, root: TreeNode) -> int:
+    if root:
+        left = self.maxDepth(root.left)
+        right = self.maxDepth(root.right)
+        return max(left, right) + 1
+    else:
+        return 0
+
+
+# iterative based on postorder
+def maxDepth_1(self, root: TreeNode) -> int:
+    stack, depths = [(root, False)], {}
+    if not root:
+        return 0
+
+    while stack:
+        curr, visited = stack.pop()
+        if visited:  # visited
+            depths[curr] = 1 + max(depths.get(curr.left, 0), depths.get(curr.right, 0))
+        else:  # not visited
+            if curr:
+                stack.append((curr, True))
+                stack.append((curr.left, False))
+                stack.append((curr.right, False))
+
+    return depths[root]
+
 
 #########################################################
 #            Tree advanced property, LCA                #
