@@ -7,7 +7,8 @@
 #   - tree property (Depth, height, diameter)
 #   - tree advanced property, LCA
 #   - tree path
-#   - Hoc
+#   - Reconstruct the Tree
+#   - AD HOC Problems
 
 # - BST
 #   - BST rules
@@ -29,7 +30,17 @@
 # LC. 590 N-ary Tree Postorder Traversal
 
 # Tree Property
+# LC. 111 Minimum Depth of Binary Tree
+# LC. 110 Balanced Binary Tree
+# LC. 543 Diameter of Binary Tree
+# LC. 559 Maximum Depth of N-ary Tree
+# LC. 104 Maximum Depth of Binary Tree
 
+# Path:
+# LC. 112 Path Sum
+# LC. 113 Path Sum II
+# LC. 129 Sum Root to Leaf Numbers
+# LC. 257 Binary Tree Paths
 
 # Get to know tree - Implementation
 class TreeNode:
@@ -581,6 +592,7 @@ def diameterOfBinaryTree_2(self, root: TreeNode) -> int:
 
 
 # LC. 559 Maximum Depth of N-ary Tree
+
 # recursive, DFS
 def maxDepth_nary(self, root: "Node") -> int:
     # recursive
@@ -645,3 +657,259 @@ def maxDepth_1(self, root: TreeNode) -> int:
 #########################################################
 #            Tree advanced property, LCA                #
 #########################################################
+
+
+#########################################################
+#             Path - Root to Leaf                       #
+#########################################################
+
+# LC. 112 Path Sum
+def hasPathSum(self, root: TreeNode, sum: int) -> bool:
+    # root to leaf, better DFS
+    # recursive or iterative?
+    # which order? -- preoder -- easy with iterative
+
+    if not root:
+        return False
+
+    stack, remain = [], {}
+    stack = [root]
+    remain[root] = sum
+
+    while stack:
+        node = stack.pop()
+        if node:
+            remain[node] -= node.val  # not sure
+            if remain[node] == 0:
+                if not (node.left or node.right):
+                    return True
+        if node.right:
+            stack.append(node.right)
+            remain[node.right] = remain[node]
+        if node.left:
+            stack.append(node.left)
+            remain[node.left] = remain[node]
+
+    return False
+
+
+# recursive
+def hasPathSum_1(self, root, sum):
+    if not root:
+        return False
+
+    if not root.left and not root.right and root.val == sum:
+        return True
+
+    sum -= root.val
+
+    return self.hasPathSum(root.left, sum) or self.hasPathSum(root.right, sum)
+
+
+# LC. 113 Path Sum II
+# extend the hasPathSum iterative solution (but a lot of memory use.. can still improve)
+# for example, instead of saving whole array in dict, You just need to save the parent node for children.
+#
+def pathSum(self, root: TreeNode, sum: int):
+    if not root:
+        return []
+
+    stack, remain = [], {}
+    stack = [root]
+    remain[root] = [sum, [root.val]]
+    res = []
+
+    while stack:
+        node = stack.pop()
+        if node:
+            remain[node][0] -= node.val  # not sure
+            if remain[node][0] == 0:
+                if not (node.left or node.right):
+                    res.append(remain[node][1])
+        if node.right:
+            stack.append(node.right)
+            remain[node.right] = [remain[node][0], remain[node][1] + [node.right.val]]
+        if node.left:
+            stack.append(node.left)
+            remain[node.left] = [remain[node][0], remain[node][1] + [node.left.val]]
+
+    return res
+
+
+## someones solution using backtracking
+class Solution_pathSum:
+    def pathSum(self, root: TreeNode, sum: int):
+        rst = []
+        self._dfs(root, sum, rst, [])
+        return rst
+
+    def _dfs(self, root, sum, rst, path):
+        if not root:
+            return
+
+        # add current root's value to the path
+        path.append(root.val)
+
+        # in case this is a leaf node
+        if not root.left and not root.right:
+            if not sum - root.val:
+                # for primitive values, [:] is sufficient (although it is doing shallow copy)
+                rst.append(path[:])
+        else:
+            self._dfs(root.left, sum - root.val, rst, path)
+            self._dfs(root.right, sum - root.val, rst, path)
+
+        # backtrack
+        path.pop()
+
+
+# LC. 129 Sum Root to Leaf Numbers
+
+# LC. 257 Binary Tree Paths
+
+
+#########################################################
+#             Path - Any to Any Node Path               #
+#########################################################
+#
+# LC. 437
+# LC. 124
+# LC. 543
+
+
+#########################################################
+#                 Reconstruct the Tree                  #
+#########################################################
+#
+# LC. 114 Flatten Binary Tree to Linked List
+def flatten(self, root: TreeNode):
+    """
+    Do not return anything, modify root in-place instead
+    """
+    if not root:
+        return []
+
+    stack = [root.right, root.left]
+    while stack:
+        node = stack.pop()
+        if node:
+            stack.append(node.right)
+            stack.append(node.left)
+
+            root.right = node
+            root.left = None
+            root = root.right
+
+
+def __init__(self):
+    self.prev = None
+
+
+def flatten_1(self, root):
+    if not root:
+        return None
+    self.flatten_1(root.right)
+    self.flatten_1(root.left)
+
+    root.right = self.prev
+    root.left = None
+    self.prev = root
+
+
+# LC. 617
+# LC. 226
+# LC. 654
+
+#########################################################
+#                    AD HOC Problems                    #
+#########################################################
+# LC. 250
+# LC. 863 All Nodes Distance K in Binary Tree
+
+
+class Solution_863:
+    def __init__(self):
+        self.res = []
+
+    def distanceK(self, root: TreeNode, target: TreeNode, K: int):
+        # can go three directions: left, right, back
+        # solution 1: create a dict to store the prev node
+        # iterative
+        lut, stack = {}, [root]
+        lut[root] = None
+
+        if not root:
+            return []
+
+        while stack and root:
+            root = stack.pop()
+            if root != target:
+                if root.right:
+                    lut[root.right] = root
+                    stack.append(root.right)
+                if root.left:
+                    lut[root.left] = root
+                    stack.append(root.left)
+            else:
+                break
+
+        # find target, go down for k
+        self.downK(root, K)
+
+        # find target, go up for k (go up x, then go down k-x)
+
+        while lut[root] and K > 0:
+            if lut[root].left and lut[root].left == root:
+                lut[root].left = None
+            else:
+                lut[root].right = None
+            K -= 1
+            root = lut[root]
+            self.downK(root, K)
+
+        return self.res
+
+    # function that go down K
+    def downK(self, root: TreeNode, K: int):
+        if root:
+            if K == 0:
+                self.res += [root.val]
+            else:
+                self.downK(root.left, K - 1)
+                self.downK(root.right, K - 1)
+
+
+class Solution_863_2:
+    def distanceK(self, root: TreeNode, target: TreeNode, K: int):
+        conn = collections.defaultdict(list)
+
+        def connect(parent, child):
+            # both parent and child are not empty
+            if parent and child:
+                # building an undirected graph representation, assign the
+                # child value for the parent as the key and vice versa
+                conn[parent.val].append(child.val)
+                conn[child.val].append(parent.val)
+            # in-order traversal
+            if child.left:
+                connect(child, child.left)
+            if child.right:
+                connect(child, child.right)
+
+        # the initial parent node of the root is None
+        connect(None, root)
+        # start the breadth-first search from the target, hence the starting level is 0
+        bfs = [target.val]
+        seen = set(bfs)
+        # all nodes at (k-1)th level must also be K steps away from the target node
+        for _ in range(K):
+            # expand the list comprehension to strip away the complexity
+            new_level = []
+            for q_node_val in bfs:
+                for connected_node_val in conn[q_node_val]:
+                    if connected_node_val not in seen:
+                        new_level.append(connected_node_val)
+            bfs = new_level
+            # add all the values in bfs into seen
+            seen |= set(bfs)
+        return bfs
