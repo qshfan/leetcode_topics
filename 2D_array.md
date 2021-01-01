@@ -5,6 +5,7 @@
 # 240. Search a 2D Matrix II
 
 
+```python
 import bisect
 
 # 74. Search a 2D Matrix
@@ -29,3 +30,4 @@ class Solution_240:
             else:
                 col -= 1
         return False
+```
