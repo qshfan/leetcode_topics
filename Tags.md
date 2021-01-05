@@ -2,6 +2,7 @@
 
 ## Tags on types of problem
 #math
+#palindrom
 #construct_tree
 #preorder
 #inorder
@@ -28,6 +29,7 @@
 
 ## Tags on special data structure
 #2d_array 
+#sorted_array
 #linkedlist
 #stack
 #deque
@@ -40,3 +42,8 @@
 ## Tags on clean code tricks
 #neat 
 #strOps
+#odd_even_partition
+
+## Tags of very difficult problems
+when i have difficulty to understand / come up the solution alone, look back on them someday in future
+#super_hard
