@@ -3,6 +3,7 @@
 ## Tags on types of problem
 #math
 #palindrom
+#duplicates
 #construct_tree
 #preorder
 #inorder

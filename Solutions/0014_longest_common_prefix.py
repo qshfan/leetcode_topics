@@ -1,6 +1,6 @@
 # 0014_longest_common_prefix
 # Easy
-# Keys: #strOps
+# Keys: #strOps #duplicates
 
 
 class Solution:
